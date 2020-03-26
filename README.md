@@ -11,7 +11,7 @@ To demonstrate the basics of how a container can be constructed inside a host op
 
 ## Prerequisites
 * Must be run on a Linux machine
-* Must have Go installed and PATH variable set up in ~/.profile
+* Must have Go installed and PATH variable set up in `~/.profile`
 ```
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
@@ -58,8 +58,8 @@ go run main.go run /bin/bash
 ---
 ## What is happening?
 
-* A container with its own namespaces for hostname, process ids and mounts are set up with `syscall.CLONE_NEWUTS`, `syscall.CLONE_NEWPID` and `syscall.CLONE_NEWNS`
+* A container with its own namespaces for hostname, process ids and mounts is set up by `syscall.CLONE_NEWUTS`, `syscall.CLONE_NEWPID` and `syscall.CLONE_NEWNS`
 * A different hostname for the container is set with `syscall.Sethostname`
 * The container is set to point towards a new root file system (whatever you decided to base it on) through `syscall.Chroot()` and `syscall.Chdir()`
-* A new `proc/` folder is mounted with `syscall.Mount()` which allows process ids to be isolated from those of the host operating system. This allows ps command to only show the container’s processes
+* A new `proc/` folder is mounted with `syscall.Mount()` which allows process ids to be isolated from those of the host operating system. This allows `ps` command to only show the container’s processes
 * A control group is set up with the custom function `cg()`. The arbitrary rule set up is to limit the max number of processes that the container can run to 30. This could be used to limit memory or CPU usage instead.
