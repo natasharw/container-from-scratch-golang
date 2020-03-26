@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 	"syscall"
 )
 
@@ -66,6 +69,23 @@ func child() {
 
 	//clean up mounts
 	must(syscall.Unmount("/proc", 0))
+}
+
+func cg() {
+	cgroups := "/sys/fs/cgroup/"
+	pids := filepath.Join(cgroups, "pids")
+
+	//create a new directory for the control group
+	os.Mkdir(filepath.Join(pids, "newcg"), 0755)
+
+	//state rule that says inside the control group can only contain 30 processes
+	must(ioutil.WriteFile(filepath.Join(pids, "newcg/pids.max"), []byte("30"), 0700))
+
+	//remove this when container exits
+	must(ioutil.WriteFile(filepath.Join(pids, "newcg/notify_on_release"), []byte("1"), 0700))
+
+	//writes current process id into a file to identify that it belongs to control group
+	must(ioutil.WriteFile(filepath.Join(pids, "newcg/cgroup.procs"), []byte(strconv.Itoa(os.Getpid())), 0700))
 }
 
 func must(err error) {
