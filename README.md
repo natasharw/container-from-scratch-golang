@@ -11,20 +11,16 @@ To demonstrate the basics of how a container can be constructed inside a host op
 
 ## Prerequisites
 * Must be run on a Linux machine
-* Must have Go installed and PATH variable set up in `~/.profile`
-```
-export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-```
-* Ensure that you are operating with root privileges on the host. Hint: you may need to use `sudo bash`  
+* Install [Go](https://golang.org/dl/)
+* Ensure you are operating with root privileges on host. Hint: you may need to use `sudo bash`  
 
 
 ## How to run
-#### 1. Clone the repository
+#### 1. Clone repository
 ```
 git clone https://github.com/natasharw/container-from-scratch-golang.git
 ```
-#### 2. Decide what distribution you want for the container. For example Ubuntu or Alpine. Download a copy of its root file system into a new directory.
+#### 2. Decide what distribution you want for the container, e.g. Ubuntu or Alpine. Download a copy of its root file system into a new directory.
 Example using Ubuntu Minimal:
 ```
 mkdir my-new-fs
@@ -41,7 +37,7 @@ tar xvf ubuntu-minimal.tar.qz
 ```
 rm ubuntu-minimal.tar.qz
 ```
-#### 3. Change the path in the Chroot command in `main.go` to the new directory:
+#### 3. Change the path called by Chroot command in `main.go` to your new file system's directory:
 Example: 
 `must(syscall.Chroot("/path/to/your/my-new-fs"))` —> `must(syscall.Chroot(“/home/natasha/my-new-fs”))`
 #### 4. Run the container, specifying a desired process
@@ -62,9 +58,9 @@ go run main.go run /bin/bash
 ## What is happening?
 
 * A container with its own namespaces for hostname, process ids and mounts is set up by `syscall.CLONE_NEWUTS`, `syscall.CLONE_NEWPID` and `syscall.CLONE_NEWNS`
-* `syscall.Sethostname` sets a different hostname for the container
+* `syscall.Sethostname()` sets a different hostname for the container
 * The container points towards a new root file system (whatever you decided to base it on) through `syscall.Chroot()` and `syscall.Chdir()`
-* A new `proc/` folder is mounted with `syscall.Mount()`, allowing process ids to be isolated from those of the host operating system
+* A new `proc/` folder is mounted with `syscall.Mount()`, allowing process IDs to be isolated from those of the host operating system
   * `ps` command will now only show the container’s processes
 * A control group is set up with the custom function `cg()`
   * The arbitrary rule set up is to limit the max number of processes that the container can run to 30. This could be used to limit memory or CPU usage instead
