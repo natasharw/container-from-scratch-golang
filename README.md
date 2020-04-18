@@ -63,5 +63,5 @@ $ exit
 * The container points towards the new root file system with `syscall.Chroot()` and `syscall.Chdir()`
 * A new `proc/` folder is mounted with `syscall.Mount()`, allowing process IDs to be isolated from those of the host operating system
   * `$ ps` will now only show the container’s processes
-* A control group for the container is created with the custom function `cg()`
+* A control group for the container is created with the custom function `setCg()`
   * The arbitrary rule used is to limit the maximum number of processes that the container can run. A control group could be used to limit memory or CPU usage instead if you wanted
