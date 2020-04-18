@@ -27,18 +27,15 @@ func main() {
 func run() {
 	fmt.Printf("Running %v as pid %d\n", os.Args[2:], os.Getpid())
 
-	//take command line arguments as input
-	//creates child process to set specifics of container
 	cmd := exec.Command("/proc/self/exe", append([]string{"child"}, os.Args[2:]...)...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	//create new hostname, process ids, and mounts namespaces
-	//CLONE_NEWUTS: new unix time sharing namespace
-	//CLONE_NEWPID: new process ids namespaces
-	//CLONE_NEWNS: new namespace for mounts
-	//Unshareflags: do not share mounts of container back with the host
+	// CLONE_NEWUTS: new unix time sharing namespace (hostname)
+	// CLONE_NEWPID: new processes namespace
+	// CLONE_NEWNS: new mounts namespace
+	// Unshareflags: do not share mounts of container back with the host
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
 		Unshareflags: syscall.CLONE_NEWNS,
@@ -54,37 +51,35 @@ func child() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	//set up a control group to specify what resources the container can use
-	cg()
+	// set up control group against container resources
+	setCg()
 
-	// set a new hostname on creation of container
+	// set hostname for container
 	must(syscall.Sethostname([]byte(hostName)))
 
-	//change container's root directory to be the desired file system
-	must(syscall.Chroot("/path/to/your/my-new-fs"))
+	// change container's root directory
+	must(syscall.Chroot("./root-file-system/"))
 	must(syscall.Chdir("/"))
 
 	// mount proc at proc, declaring it is a proc file system
-	// this allows process ids to be isolated
 	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 
 	must(cmd.Run())
 
-	//clean up mounts
+	// clean up mounts
 	must(syscall.Unmount("/proc", 0))
 }
 
-func cg() {
+func setCg() {
 	cgroups := "/sys/fs/cgroup/"
 	pids := filepath.Join(cgroups, "pids")
 
-	// create new directory for control group
 	os.Mkdir(filepath.Join(pids, "newcg"), 0755)
 
 	// state rule to set max number of system processes within control group
 	must(ioutil.WriteFile(filepath.Join(pids, "newcg/pids.max"), []byte(maxProcesses), 0700))
 
-	// remove this when container exits
+	// remove when container exits
 	must(ioutil.WriteFile(filepath.Join(pids, "newcg/notify_on_release"), []byte("1"), 0700))
 
 	// write current process id into file to identify it belongs to control group
