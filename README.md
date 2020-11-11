@@ -22,7 +22,7 @@ It was guided by Liz Rice’s amazing [GOTO 2018 talk](https://www.youtube.com/w
 $ git clone https://github.com/natasharw/container-from-scratch-golang.git
 ```
 #### 2. Extract an image of a root file system for the container into the empty placeholder directory
-Good choices for distribution might be Alpine or Ubuntu. Here is an example using a minimal Ubuntu distribution:
+Good choices for distribution would be something lightweight. Here is an example using a minimal Ubuntu distribution:
 ```
 $ cd container-from-scratch-golang/root-file-system
 ```
