@@ -11,7 +11,7 @@ It was guided by Liz Rice’s amazing [GOTO 2018 talk](https://www.youtube.com/w
 
 
 ## Prerequisites
-* Linux machine for testing purpose only
+* Linux machine for testing purpose only (e.g. temporary VM)
 * Go installed
 * Operating with root privileges. Hint: you may need to use `sudo bash`
 
